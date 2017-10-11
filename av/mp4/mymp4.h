@@ -10,7 +10,7 @@ public:
 	void deinit(void);
 
 	//audio
-	bool init_a(int nSampleRate, int m_nInputSamples, unsigned char* faacDecoderInfo, int faacDecoderInfoSize);
+	bool init_a(int hz, int m_input_samples, const unsigned char* aac_decoder_info, int aac_decoder_info_size);
 	void deinit_a(void);
 	bool write_a(const char *pd, int size);
 
@@ -19,11 +19,12 @@ public:
 	void deinit_v(void);
 
 private:
-
-	void* m_Mp4File;
+	void* m_h_mp4;
 
 	//audio
-	int m_AudioTrackId;//MP4TrackId 
+	unsigned int m_a_track_id; //MP4TrackId use unsigned int
+
+	//video
 };
 
 #endif

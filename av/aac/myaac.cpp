@@ -10,51 +10,54 @@
 
 myaac::myaac(void)
 {
-	m_hEncoder = NULL;
-	m_pOutAACBuffer = NULL;
-	faacDecoderInfo = NULL;
+	m_h_encoder = NULL;
+	m_p_out_buf = NULL;
+	m_decoder_info = NULL;
 }
 
 myaac::~myaac(void)
 {
-	printf("~aac\n");
+	//printf("~aac\n");
 	deinit();
 }
 
 void myaac::deinit(void)
 {
-	if (faacDecoderInfo)
+	if (m_decoder_info)
 	{
-		free( faacDecoderInfo );
-		faacDecoderInfo = NULL;
+		free(m_decoder_info);
+		m_decoder_info = NULL;
 	}
 
-	if ( m_pOutAACBuffer)
+	if (m_p_out_buf)
 	{
-		delete [] m_pOutAACBuffer;
-		m_pOutAACBuffer = NULL;
+		delete[] m_p_out_buf;
+		m_p_out_buf = NULL;
 	}
 
-	faacEncClose( m_hEncoder);
+	if (m_h_encoder)
+	{
+		faacEncClose(m_h_encoder);
+	}
 }
 
-bool myaac::init(int nSampleRate, int channal, int bitsPerSample)
+bool myaac::init(int hz, int channal, int bits)
 {
-	int iret=0;
-	m_hz = nSampleRate;
+	int iret = 0;
+	m_hz = hz;
 	m_channal = channal;
-	m_nBitsPerSample = bitsPerSample;
+	m_bits = bits;
 
 	// init faac
-	m_hEncoder = faacEncOpen(nSampleRate, m_channal, &m_nInputSamples, &m_nMaxOutputBytes);
+	m_h_encoder = faacEncOpen(m_hz, m_channal, &m_input_samples, &m_max_output_size);
 
-	m_nMaxInputBytes = m_nInputSamples*bitsPerSample*m_channal / 8;
+	//m_nMaxInputBytes = m_input_samples*m_bits*m_channal / 8;
 
-	m_pOutAACBuffer = new unsigned char[m_nMaxOutputBytes];
+	m_p_out_buf = new unsigned char[m_max_output_size];
 
 	// Get current encoding configuration
-	faacEncConfigurationPtr pConfiguration = faacEncGetCurrentConfiguration(m_hEncoder);
-	if (!pConfiguration)
+	faacEncConfigurationPtr p_cfg = faacEncGetCurrentConfiguration(m_h_encoder);
+	if (!p_cfg)
 	{
 		printf("faacEncGetCurrentConfiguration error!\n");
 		deinit();
@@ -62,26 +65,26 @@ bool myaac::init(int nSampleRate, int channal, int bitsPerSample)
 	}
 
 	//设置版本,录制MP4文件时要用MPEG4
-	pConfiguration->version = MPEG4;
-	pConfiguration->aacObjectType = LOW; //LC编码
+	p_cfg->version = MPEG4;
+	p_cfg->aacObjectType = LOW; //LC编码
 
 	//输入数据类型
-	pConfiguration->inputFormat = FAAC_INPUT_16BIT;
+	p_cfg->inputFormat = FAAC_INPUT_16BIT;
 
 	// outputFormat (0 = Raw; 1 = ADTS)
 	// 录制MP4文件时，要用raw流。检验编码是否正确时可设置为 adts传输流，
-	pConfiguration->outputFormat = 1;
+	p_cfg->outputFormat = 1;
 
 	//瞬时噪声定形(temporal noise shaping，TNS)滤波器
-	pConfiguration->shortctl = SHORTCTL_NORMAL;
+	p_cfg->shortctl = SHORTCTL_NORMAL;
 
-	pConfiguration->useTns = true;
-	//pConfiguration->useLfe=false;
-	pConfiguration->quantqual = 100;
-	pConfiguration->bandWidth = 0;
-	pConfiguration->bitRate = 0;
+	p_cfg->useTns = true;
+	//p_cfg->useLfe=false;
+	p_cfg->quantqual = 100;
+	p_cfg->bandWidth = 0;
+	p_cfg->bitRate = 0;
 
-	iret = faacEncSetConfiguration(m_hEncoder, pConfiguration);
+	iret = faacEncSetConfiguration(m_h_encoder, p_cfg);
 	if (iret != 1)
 	{
 		deinit();
@@ -90,7 +93,7 @@ bool myaac::init(int nSampleRate, int channal, int bitsPerSample)
 	}
 
 	// get decoder info
-	if (faacEncGetDecoderSpecificInfo(m_hEncoder, &faacDecoderInfo, &faacDecoderInfoSize))
+	if (faacEncGetDecoderSpecificInfo(m_h_encoder, &m_decoder_info, &m_decoder_info_size))
 	{
 		deinit();
 		printf("faacEncGetDecoderSpecificInfo error!\n");
@@ -104,14 +107,14 @@ bool myaac::init(int nSampleRate, int channal, int bitsPerSample)
 
 void myaac::pcm2aac(const char* pdata, int samples, std::vector<char> &v_aac)
 {
-	int nRet = faacEncEncode(m_hEncoder, (int*)pdata, samples, m_pOutAACBuffer, m_nMaxOutputBytes );
-	if ( nRet <= 0 )
+	int iret = faacEncEncode(m_h_encoder, (int*)pdata, samples, m_p_out_buf, m_max_output_size);
+	if (iret <= 0)
 	{
 		return;
 	}
 
-	for (int i = 0; i < nRet; i++)
+	for (int i = 0; i < iret; i++)
 	{
-		v_aac.push_back(*(m_pOutAACBuffer+i));
+		v_aac.push_back(*(m_p_out_buf + i));
 	}
 }
