@@ -49,12 +49,20 @@ static void amp4(void)
 }
 
 
+void h264_vec(std::vector<vector<char>> &v_slice);
+static void vmp4(void)
+{
+	vector<vector<char>> v_slice;
+	h264_vec(v_slice);
+	int a = 0;
+	a ++;
+
+}
 
 void tst_mp4(void)
 {
-
-
-	amp4();
+	//amp4();
+	vmp4();
 
 
 
