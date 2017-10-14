@@ -12,7 +12,6 @@ myaac::myaac(void)
 {
 	m_h_encoder = NULL;
 	m_p_out_buf = NULL;
-	m_decoder_info = NULL;
 }
 
 myaac::~myaac(void)
@@ -23,12 +22,6 @@ myaac::~myaac(void)
 
 void myaac::deinit(void)
 {
-	if (m_decoder_info)
-	{
-		free(m_decoder_info);
-		m_decoder_info = NULL;
-	}
-
 	if (m_p_out_buf)
 	{
 		delete[] m_p_out_buf;
@@ -93,12 +86,17 @@ bool myaac::init(int hz, int channal, int bits)
 	}
 
 	// get decoder info
-	if (faacEncGetDecoderSpecificInfo(m_h_encoder, &m_decoder_info, &m_decoder_info_size))
+	unsigned char* p_decoder_info;
+	unsigned long  decoder_info_size;
+	if (faacEncGetDecoderSpecificInfo(m_h_encoder, &p_decoder_info, &decoder_info_size))
 	{
 		deinit();
 		printf("faacEncGetDecoderSpecificInfo error!\n");
 		return false;
 	}
+	std::vector<char> v_decoder_info(p_decoder_info,p_decoder_info+decoder_info_size);
+	m_v_decoder_info = v_decoder_info;
+	free(p_decoder_info);
 
 	return true;
 }

@@ -12,9 +12,7 @@ public:
 	void pcm2aac(const char * pdata, int samples, std::vector<char> &v_aac);
 
 	unsigned long m_input_samples;		// 输入样本数
-	//unsigned long m_nMaxInputBytes;		// 输入所需最大空间
-	unsigned char* m_decoder_info;
-	unsigned long  m_decoder_info_size;
+	std::vector<char> m_v_decoder_info;
 
 private:
 	void deinit(void);
