@@ -39,6 +39,7 @@ modules.builtin
 /Debug/*.ilk
 /Debug/*.pdb
 /av/Debug
+/av/*.vcproj.*
 /av/*.mp4
 
 #
