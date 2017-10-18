@@ -88,7 +88,7 @@ void h264_vec(std::vector<vector<char>> &v_slice)
 	m_nFileBufSize = fread(h264_data,1,sizeof(h264_data),fp);
 	fclose(fp);
 
-	NaluUnit nalu;
+	//NaluUnit nalu;
 	unsigned char *m_pFileBuf = h264_data;
 
 	char *p_b=(char*)h264_data;
