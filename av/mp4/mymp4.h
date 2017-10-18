@@ -2,6 +2,7 @@
 #define __MYMP4_H__
 
 #include <vector>
+#include <string>
 
 class mymp4
 {
@@ -17,12 +18,15 @@ public:
 	//video
 	bool init_v(int width,int height, int frameRate,const std::vector<char>&v_sps,const std::vector<char>&v_pps);
 	bool mymp4::write_v(const char *pd, int size);
-	inline bool mymp4::write_v(const std::vector<char> &v){return write_v(&v[0], v.size());}
 
 private:
 	void deinit(void);
+	mymp4(const mymp4&);
+	mymp4& operator=(const mymp4&);
+
 	void* m_h_mp4;
 	int m_time_scale;
+	std::string m_file_name;
 
 	//audio
 	void deinit_a(void);

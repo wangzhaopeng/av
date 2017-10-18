@@ -22,6 +22,7 @@ mymp4::~mymp4(void)
 
 bool mymp4::init(const char * pfile, int time_scale)
 {
+	m_file_name = pfile;
 	m_h_mp4 = MP4Create(pfile, 0);
 	if (m_h_mp4 == MP4_INVALID_FILE_HANDLE)
 	{
@@ -41,6 +42,7 @@ void mymp4::deinit(void)
 		MP4Close(m_h_mp4);
 		m_h_mp4 = MP4_INVALID_FILE_HANDLE;
 	}
+	m_file_name = "";
 }
 
 bool mymp4::init_a(int hz, int m_input_samples, const std::vector<char>&v_aac_decoder_info)

@@ -26,7 +26,7 @@ void tst_mp4(void)
 		o_mp4.init_v(1280,720,30,v_slice[0],v_slice[1]);
 		for(int i = 2; i < (int)v_slice.size(); i++)
 		{
-			o_mp4.write_v(v_slice[i]);
+			o_mp4.write_v(&v_slice[i][0], v_slice[i].size());
 		}
 	}
 
