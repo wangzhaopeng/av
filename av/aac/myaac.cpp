@@ -111,8 +111,6 @@ void myaac::pcm2aac(const char* pdata, int samples, std::vector<char> &v_aac)
 		return;
 	}
 
-	for (int i = 0; i < iret; i++)
-	{
-		v_aac.push_back(*(m_p_out_buf + i));
-	}
+	std::vector<char> v_tem(m_p_out_buf,m_p_out_buf+iret);
+	v_aac.swap(v_tem);
 }
