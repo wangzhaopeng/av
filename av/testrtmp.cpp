@@ -35,7 +35,7 @@ void tst_rtmp(void)
 	wav_vec(o_aac.get_input_samples(),va_slice);
 	
 
-	CRTMPStream rtmpSender;
+	myrtmp rtmpSender;
 	bool bRet = rtmpSender.connect("rtmp://192.168.5.116/live/zb");
 
 	NaluUnit naluUnit;

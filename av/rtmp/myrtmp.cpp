@@ -31,25 +31,25 @@ inline void CleanupSockets()
 #endif     
 }
 
-CRTMPStream::CRTMPStream(void)
+myrtmp::myrtmp(void)
 {
 	m_pRtmp = NULL;
 	InitSockets();
 }
 
-CRTMPStream::~CRTMPStream(void)
+myrtmp::~myrtmp(void)
 {
 	deinit();
 }
 
-void CRTMPStream::deinit(void)
+void myrtmp::deinit(void)
 {
 	close();
 	CleanupSockets();
 }
 
 
-bool CRTMPStream::connect(const char* url)
+bool myrtmp::connect(const char* url)
 {
 	m_pRtmp = RTMP_Alloc();
 	RTMP_Init(m_pRtmp);
@@ -80,7 +80,7 @@ bool CRTMPStream::connect(const char* url)
 	return TRUE;
 }
 
-void CRTMPStream::close()
+void myrtmp::close()
 {
 	if (m_pRtmp)
 	{
@@ -90,7 +90,7 @@ void CRTMPStream::close()
 	}
 }
 
-bool CRTMPStream::SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size, unsigned int nTimestamp)
+bool myrtmp::SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size, unsigned int nTimestamp)
 {
 	if (m_pRtmp == NULL)
 	{
@@ -121,7 +121,7 @@ bool CRTMPStream::SendPacket(unsigned int nPacketType, unsigned char *data, unsi
 	}
 }
 
-bool CRTMPStream::init_v(const std::vector<char>&v_sps, const std::vector<char>&v_pps)
+bool myrtmp::init_v(const std::vector<char>&v_sps, const std::vector<char>&v_pps)
 {
 	char *body = new char[1024 + v_sps.size() + v_pps.size()];
 
@@ -163,7 +163,7 @@ bool CRTMPStream::init_v(const std::vector<char>&v_sps, const std::vector<char>&
 	return bret;
 }
 
-bool CRTMPStream::send_v(const char *pd, int size, bool key_frame, unsigned int time_stamp)
+bool myrtmp::send_v(const char *pd, int size, bool key_frame, unsigned int time_stamp)
 {
 	if (pd == NULL && size<11)
 	{
@@ -201,7 +201,7 @@ bool CRTMPStream::send_v(const char *pd, int size, bool key_frame, unsigned int 
 }
 
 
-bool CRTMPStream::init_a(std::vector<char> aac_info)
+bool myrtmp::init_a(std::vector<char> aac_info)
 {
 	char *body = new char[aac_info.size() + 8];
 	body[0] = (char)0xAF;
@@ -212,7 +212,7 @@ bool CRTMPStream::init_a(std::vector<char> aac_info)
 	return bret;
 }
 
-bool CRTMPStream::send_a(const char *pd, int size, unsigned int time_stamp)
+bool myrtmp::send_a(const char *pd, int size, unsigned int time_stamp)
 {
 	unsigned char *body = new unsigned char[size + 8];
 	body[0] = 0xAF;

@@ -10,11 +10,12 @@
 #include <vector>
 
 
-class CRTMPStream
+//class CRTMPStream
+class myrtmp
 {
 public:
-	CRTMPStream(void);
-	~CRTMPStream(void);
+	myrtmp(void);
+	~myrtmp(void);
 public:
 	// Á¬½Óµ½RTMP Server
 	bool connect(const char* url);
