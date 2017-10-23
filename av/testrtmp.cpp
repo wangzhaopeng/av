@@ -38,7 +38,7 @@ void tst_rtmp(void)
 	CRTMPStream rtmpSender;
 	bool bRet = rtmpSender.connect("rtmp://192.168.5.116/live/zb");
 
-	NaluUnit naluUnit;  
+	NaluUnit naluUnit;
 
 	//// ·¢ËÍMetaData   
 	//rtmpSender.SendMetadata(&metaData);  
