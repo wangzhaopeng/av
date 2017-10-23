@@ -10,16 +10,16 @@
 #include <vector>
 
 
-class CRTMPStream  
-{  
-public:  
-	CRTMPStream(void);  
-	~CRTMPStream(void);  
-public:  
-	// 连接到RTMP Server   
-	bool connect(const char* url);  
+class CRTMPStream
+{
+public:
+	CRTMPStream(void);
+	~CRTMPStream(void);
+public:
+	// 连接到RTMP Server
+	bool connect(const char* url);
 	// 断开连接   
-	void close();  
+	void close();
 
 	bool init_v(const std::vector<char>&v_sps, const std::vector<char>&v_pps);
 	bool send_v(const char *pd, int size, bool key_frame, unsigned int time_stamp);
@@ -30,10 +30,9 @@ public:
 
 private:
 	// 发送数据   
-	int SendPacket(unsigned int nPacketType,unsigned char *data,unsigned int size,unsigned int nTimestamp);  
-private:  
+	bool SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size, unsigned int nTimestamp);
+private:
 	RTMP* m_pRtmp;
-};  
-
+};
 
 #endif

@@ -24,9 +24,6 @@ typedef struct _NaluUnit
 
 void tst_rtmp(void)
 {
-
-
-
 	vector<vector<char>> v_slice;
 	h264_vec(v_slice);
 
@@ -53,7 +50,7 @@ void tst_rtmp(void)
 
 	unsigned int tick = 0;  
 	//while(ReadOneNaluFromBuf(naluUnit))  
-	for(int i = 2; i < v_slice.size(); i++)
+	for(int i = 2; i < (int)v_slice.size(); i++)
 	{  
 		naluUnit.data = (unsigned char*)&v_slice[i][0];
 		naluUnit.size = v_slice[i].size();
