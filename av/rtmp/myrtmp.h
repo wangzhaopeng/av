@@ -17,9 +17,9 @@ public:
 	myrtmp(void);
 	~myrtmp(void);
 public:
+	inline bool init(const char* url){return connect(url);}
 	// 连接到RTMP Server
 	bool connect(const char* url);
-	inline bool init(const char* url){return connect(url);}
 	// 断开连接   
 	void close();
 
@@ -34,7 +34,7 @@ public:
 private:
 	void deinit(void);
 	// 发送数据   
-	bool SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size, unsigned int nTimestamp);
+	bool send_packet(int nPacketType, const char *pd, int size, unsigned int nTimestamp);
 private:
 	RTMP* m_pRtmp;
 };

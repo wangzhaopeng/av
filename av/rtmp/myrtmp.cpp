@@ -48,7 +48,6 @@ void myrtmp::deinit(void)
 	CleanupSockets();
 }
 
-
 bool myrtmp::connect(const char* url)
 {
 	m_pRtmp = RTMP_Alloc();
@@ -90,7 +89,7 @@ void myrtmp::close()
 	}
 }
 
-bool myrtmp::SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size, unsigned int nTimestamp)
+bool myrtmp::send_packet(int nPacketType, const char *pd, int size, unsigned int nTimestamp)
 {
 	if (m_pRtmp == NULL)
 	{
@@ -107,7 +106,7 @@ bool myrtmp::SendPacket(unsigned int nPacketType, unsigned char *data, unsigned 
 	packet.m_nTimeStamp = nTimestamp;
 	packet.m_nInfoField2 = m_pRtmp->m_stream_id;
 	packet.m_nBodySize = size;
-	memcpy(packet.m_body, data, size);
+	memcpy(packet.m_body, pd, size);
 
 	//int nRet = RTMP_SendPacket(m_pRtmp,&packet,0);  
 	int nRet = RTMP_SendPacket(m_pRtmp, &packet, 1);
@@ -158,7 +157,7 @@ bool myrtmp::init_v(const std::vector<char>&v_sps, const std::vector<char>&v_pps
 	memcpy(&body[i], &v_pps[0], v_pps.size());
 	i = i + v_pps.size();
 
-	bool bret = SendPacket(RTMP_PACKET_TYPE_VIDEO, (unsigned char*)body, i, 0);
+	bool bret = send_packet(RTMP_PACKET_TYPE_VIDEO, body, i, 0);
 	delete[] body;
 	return bret;
 }
@@ -170,7 +169,7 @@ bool myrtmp::send_v(const char *pd, int size, bool key_frame, unsigned int time_
 		return false;
 	}
 
-	unsigned char *body = new unsigned char[size + 9];
+	char *body = new char[size + 9];
 
 	int i = 0;
 	if (key_frame)
@@ -195,11 +194,10 @@ bool myrtmp::send_v(const char *pd, int size, bool key_frame, unsigned int time_
 	// NALU data   
 	memcpy(&body[i], pd, size);
 
-	bool bRet = SendPacket(RTMP_PACKET_TYPE_VIDEO, body, i + size, time_stamp);
+	bool bRet = send_packet(RTMP_PACKET_TYPE_VIDEO, body, i + size, time_stamp);
 	delete[] body;
 	return bRet;
 }
-
 
 bool myrtmp::init_a(std::vector<char> aac_info)
 {
@@ -207,18 +205,18 @@ bool myrtmp::init_a(std::vector<char> aac_info)
 	body[0] = (char)0xAF;
 	body[1] = 0x00;
 	memcpy(body + 2, &aac_info[0], aac_info.size());
-	bool bret = SendPacket(RTMP_PACKET_TYPE_AUDIO, (unsigned char*)body, 4, 0);
+	bool bret = send_packet(RTMP_PACKET_TYPE_AUDIO,body, 4, 0);
 	delete[] body;
 	return bret;
 }
 
 bool myrtmp::send_a(const char *pd, int size, unsigned int time_stamp)
 {
-	unsigned char *body = new unsigned char[size + 8];
-	body[0] = 0xAF;
+	char *body = new char[size + 8];
+	body[0] = (char)0xAF;
 	body[1] = 0x01;
 	memcpy(body + 2, pd, size);
-	bool bret = SendPacket(RTMP_PACKET_TYPE_AUDIO, body, 2 + size, time_stamp);
+	bool bret = send_packet(RTMP_PACKET_TYPE_AUDIO, body, 2 + size, time_stamp);
 	delete[] body;
 	return bret;
 }
