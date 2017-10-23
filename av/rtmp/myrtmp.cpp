@@ -1,21 +1,15 @@
-
+#include <string.h>
 #include <iostream>
 #include <vector>
 using namespace std;
 
 #include "myrtmp.h"
 
-#ifdef WIN32   
+
+#ifdef WIN32
 #pragma comment(lib,"WS2_32.lib")   
-#pragma comment(lib,"winmm.lib")   
+#pragma comment(lib,"winmm.lib")
 #endif   
-
-#include <string.h>
-
-enum
-{
-	FLV_CODECID_H264 = 7,
-};
 
 int InitSockets()
 {
@@ -29,6 +23,7 @@ int InitSockets()
 #endif     
 }
 
+
 inline void CleanupSockets()
 {
 #ifdef WIN32     
@@ -40,18 +35,25 @@ CRTMPStream::CRTMPStream(void)
 {
 	m_pRtmp = NULL;
 	InitSockets();
-	m_pRtmp = RTMP_Alloc();
-	RTMP_Init(m_pRtmp);
 }
 
 CRTMPStream::~CRTMPStream(void)
+{
+	deinit();
+}
+
+void CRTMPStream::deinit(void)
 {
 	close();
 	CleanupSockets();
 }
 
+
 bool CRTMPStream::connect(const char* url)
 {
+	m_pRtmp = RTMP_Alloc();
+	RTMP_Init(m_pRtmp);
+
 	int iret;
 	iret = RTMP_SetupURL(m_pRtmp, (char*)url);
 	if (iret != 1)
