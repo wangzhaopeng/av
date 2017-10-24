@@ -55,7 +55,7 @@ void tst_rtmp(void)
 		naluUnit.data = (unsigned char*)&v_slice[i][0];
 		naluUnit.size = v_slice[i].size();
 		naluUnit.type = naluUnit.data[0]&0x1f;  
-		bool bKeyframe  = (naluUnit.type == 0x05) ? TRUE : FALSE;  
+		bool bKeyframe  = (naluUnit.type == 0x05) ? 1 : 0;  
 		// ·¢ËÍH264Êý¾ÝÖ¡   
 		//rtmpSender.SendH264Packet(naluUnit.data,naluUnit.size,bKeyframe,tick);  
 		rtmpSender.send_v((char*)naluUnit.data,naluUnit.size,bKeyframe,tick);

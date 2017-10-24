@@ -1,3 +1,4 @@
+#include "mymp4.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -6,7 +7,7 @@ using namespace std;
 
 #include <mp4v2/mp4v2.h>
 
-#include "mymp4.h"
+
 
 
 mymp4::mymp4(void)

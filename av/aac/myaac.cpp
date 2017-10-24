@@ -1,3 +1,4 @@
+#include "myaac.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,7 +6,7 @@
 #include <vector>
 
 #include <faac.h>
-#include "myaac.h"
+
 
 
 myaac::myaac(void)

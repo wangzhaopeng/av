@@ -1,9 +1,15 @@
+#include "myrtmp.h"
+
+#include <stdio.h>
+
 #include <string.h>
 #include <iostream>
 #include <vector>
 using namespace std;
 
-#include "myrtmp.h"
+#include "librtmp/rtmp.h"
+#include "librtmp/rtmp_sys.h"   
+#include "librtmp/amf.h"   
 
 
 #ifdef WIN32
@@ -33,7 +39,7 @@ inline void CleanupSockets()
 
 myrtmp::myrtmp(void)
 {
-	m_pRtmp = NULL;
+	m_p_rtmp = NULL;
 	InitSockets();
 }
 
@@ -50,28 +56,28 @@ void myrtmp::deinit(void)
 
 bool myrtmp::connect(const char* url)
 {
-	m_pRtmp = RTMP_Alloc();
-	RTMP_Init(m_pRtmp);
+	m_p_rtmp = RTMP_Alloc();
+	RTMP_Init((RTMP *)m_p_rtmp);
 
 	int iret;
-	iret = RTMP_SetupURL(m_pRtmp, (char*)url);
-	if (iret != 1)
-	{
+	iret = RTMP_SetupURL((RTMP *)m_p_rtmp, (char*)url);
+	if (iret != 1){
 		cout << url << endl;
 		cout << "RTMP_SetupURL err" << endl;
 		return FALSE;
 	}
-	RTMP_EnableWrite(m_pRtmp);
-	iret = RTMP_Connect(m_pRtmp, NULL);
-	if (iret != 1)
-	{
+
+	RTMP_EnableWrite((RTMP *)m_p_rtmp);
+
+	iret = RTMP_Connect((RTMP *)m_p_rtmp, NULL);
+	if (iret != 1){
 		cout << url << endl;
 		cout << "RTMP_Connect err" << endl;
 		return FALSE;
 	}
-	iret = RTMP_ConnectStream(m_pRtmp, 0);
-	if (iret != 1)
-	{
+
+	iret = RTMP_ConnectStream((RTMP *)m_p_rtmp, 0);
+	if (iret != 1){
 		cout << url << endl;
 		cout << "RTMP_ConnectStream err" << endl;
 		return FALSE;
@@ -81,18 +87,16 @@ bool myrtmp::connect(const char* url)
 
 void myrtmp::close()
 {
-	if (m_pRtmp)
-	{
-		RTMP_Close(m_pRtmp);
-		RTMP_Free(m_pRtmp);
-		m_pRtmp = NULL;
+	if (m_p_rtmp){
+		RTMP_Close((RTMP *)m_p_rtmp);
+		RTMP_Free((RTMP *)m_p_rtmp);
+		m_p_rtmp = NULL;
 	}
 }
 
-bool myrtmp::send_packet(int nPacketType, const char *pd, int size, unsigned int nTimestamp)
+bool myrtmp::send_packet(int packet_type, const char *pd, int size, unsigned int nTimestamp)
 {
-	if (m_pRtmp == NULL)
-	{
+	if (m_p_rtmp == NULL){
 		return FALSE;
 	}
 
@@ -100,16 +104,16 @@ bool myrtmp::send_packet(int nPacketType, const char *pd, int size, unsigned int
 	RTMPPacket_Reset(&packet);
 	RTMPPacket_Alloc(&packet, size);
 
-	packet.m_packetType = nPacketType;
+	packet.m_packetType = packet_type;
 	packet.m_nChannel = 0x04;
 	packet.m_headerType = RTMP_PACKET_SIZE_LARGE;
 	packet.m_nTimeStamp = nTimestamp;
-	packet.m_nInfoField2 = m_pRtmp->m_stream_id;
+	packet.m_nInfoField2 = ((RTMP *)m_p_rtmp)->m_stream_id;
 	packet.m_nBodySize = size;
 	memcpy(packet.m_body, pd, size);
 
-	//int nRet = RTMP_SendPacket(m_pRtmp,&packet,0);  
-	int nRet = RTMP_SendPacket(m_pRtmp, &packet, 1);
+	//int nRet = RTMP_SendPacket(m_p_rtmp,&packet,0);  
+	int nRet = RTMP_SendPacket((RTMP *)m_p_rtmp, &packet, 1);
 
 	RTMPPacket_Free(&packet);
 
@@ -164,20 +168,16 @@ bool myrtmp::init_v(const std::vector<char>&v_sps, const std::vector<char>&v_pps
 
 bool myrtmp::send_v(const char *pd, int size, bool key_frame, unsigned int time_stamp)
 {
-	if (pd == NULL && size<11)
-	{
+	if (pd == NULL && size<11){
 		return false;
 	}
 
 	char *body = new char[size + 9];
 
 	int i = 0;
-	if (key_frame)
-	{
+	if (key_frame){
 		body[i++] = 0x17;// 1:Iframe  7:AVC   
-	}
-	else
-	{
+	}else{
 		body[i++] = 0x27;// 2:Pframe  7:AVC   
 	}
 	body[i++] = 0x01;// AVC NALU   
@@ -199,7 +199,7 @@ bool myrtmp::send_v(const char *pd, int size, bool key_frame, unsigned int time_
 	return bRet;
 }
 
-bool myrtmp::init_a(std::vector<char> aac_info)
+bool myrtmp::init_a(const std::vector<char> aac_info)
 {
 	char *body = new char[aac_info.size() + 8];
 	body[0] = (char)0xAF;
