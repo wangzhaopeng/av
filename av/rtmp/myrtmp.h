@@ -9,8 +9,7 @@ public:
 	myrtmp(void);
 	~myrtmp(void);
 public:
-	inline bool init(const char* url){return connect(url);}
-	bool connect(const char* url);
+	bool connect(const char* url,int chunk_size = 1360);
 	void close();
 
 	/////h264
@@ -24,6 +23,7 @@ public:
 private:
 	void deinit(void);
 	bool send_packet(int packet_type, const char *pd, int size, unsigned int nTimestamp);
+	bool change_chunk_size(int size);
 
 	void* m_p_rtmp;//RTMP* m_p_rtmp;
 };

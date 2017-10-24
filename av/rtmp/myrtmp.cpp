@@ -54,7 +54,7 @@ void myrtmp::deinit(void)
 	CleanupSockets();
 }
 
-bool myrtmp::connect(const char* url)
+bool myrtmp::connect(const char* url, int chunk_size)
 {
 	m_p_rtmp = RTMP_Alloc();
 	RTMP_Init((RTMP *)m_p_rtmp);
@@ -82,6 +82,12 @@ bool myrtmp::connect(const char* url)
 		cout << "RTMP_ConnectStream err" << endl;
 		return FALSE;
 	}
+
+	bool bret = change_chunk_size(chunk_size);
+	if (!bret){
+		return false;
+	}
+
 	return TRUE;
 }
 
@@ -122,6 +128,13 @@ bool myrtmp::send_packet(int packet_type, const char *pd, int size, unsigned int
 	}else{
 		return false;
 	}
+}
+
+bool myrtmp::change_chunk_size(int size)
+{
+	((RTMP *)m_p_rtmp)->m_outChunkSize = size;
+	size = htonl(size);
+	return send_packet(RTMP_PACKET_TYPE_CHUNK_SIZE,(char*)&size,sizeof(size),0);
 }
 
 bool myrtmp::init_v(const std::vector<char>&v_sps, const std::vector<char>&v_pps)
