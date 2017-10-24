@@ -194,7 +194,7 @@ bool myrtmp::send_v(const char *pd, int size, bool key_frame, unsigned int time_
 	// NALU data   
 	memcpy(&body[i], pd, size);
 
-	bool bRet = send_packet(RTMP_PACKET_TYPE_VIDEO, body, i + size, time_stamp);
+	bool bRet = send_packet(RTMP_PACKET_TYPE_VIDEO, body, i+size, time_stamp);
 	delete[] body;
 	return bRet;
 }
@@ -204,8 +204,8 @@ bool myrtmp::init_a(const std::vector<char> aac_info)
 	char *body = new char[aac_info.size() + 8];
 	body[0] = (char)0xAF;
 	body[1] = 0x00;
-	memcpy(body + 2, &aac_info[0], aac_info.size());
-	bool bret = send_packet(RTMP_PACKET_TYPE_AUDIO,body, 4, 0);
+	memcpy(body+2, &aac_info[0], aac_info.size());
+	bool bret = send_packet(RTMP_PACKET_TYPE_AUDIO,body, 2+aac_info.size(), 0);
 	delete[] body;
 	return bret;
 }
@@ -215,8 +215,8 @@ bool myrtmp::send_a(const char *pd, int size, unsigned int time_stamp)
 	char *body = new char[size + 8];
 	body[0] = (char)0xAF;
 	body[1] = 0x01;
-	memcpy(body + 2, pd, size);
-	bool bret = send_packet(RTMP_PACKET_TYPE_AUDIO, body, 2 + size, time_stamp);
+	memcpy(body+2, pd, size);
+	bool bret = send_packet(RTMP_PACKET_TYPE_AUDIO, body, 2+size, time_stamp);
 	delete[] body;
 	return bret;
 }
