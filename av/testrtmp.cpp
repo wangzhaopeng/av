@@ -6,9 +6,7 @@ using namespace std;
 
 #include <myaac.h>
 
-
 #include "myrtmp.h"
-#include <SpsDecode.h>
 
 void wav_vec(int size, std::vector<vector<char>> &v_slice);
 
