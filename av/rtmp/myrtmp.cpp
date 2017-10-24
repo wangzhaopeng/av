@@ -63,7 +63,7 @@ bool myrtmp::connect(const char* url, int chunk_size)
 	iret = RTMP_SetupURL((RTMP *)m_p_rtmp, (char*)url);
 	if (iret != 1){
 		cout << url << endl;
-		cout << "RTMP_SetupURL err" << endl;
+		cout << "RTMP_SetupURL false" << endl;
 		return FALSE;
 	}
 
@@ -72,19 +72,21 @@ bool myrtmp::connect(const char* url, int chunk_size)
 	iret = RTMP_Connect((RTMP *)m_p_rtmp, NULL);
 	if (iret != 1){
 		cout << url << endl;
-		cout << "RTMP_Connect err" << endl;
+		cout << "RTMP_Connect false" << endl;
 		return FALSE;
 	}
 
 	iret = RTMP_ConnectStream((RTMP *)m_p_rtmp, 0);
 	if (iret != 1){
 		cout << url << endl;
-		cout << "RTMP_ConnectStream err" << endl;
+		cout << "RTMP_ConnectStream false" << endl;
 		return FALSE;
 	}
 
 	bool bret = change_chunk_size(chunk_size);
 	if (!bret){
+		cout << url << endl;
+		cout << "change_chunk_size false " << chunk_size << endl;
 		return false;
 	}
 
@@ -181,10 +183,6 @@ bool myrtmp::init_v(const std::vector<char>&v_sps, const std::vector<char>&v_pps
 
 bool myrtmp::send_v(const char *pd, int size, bool key_frame, unsigned int time_stamp)
 {
-	if (pd == NULL && size<11){
-		return false;
-	}
-
 	char *body = new char[size + 9];
 
 	int i = 0;
