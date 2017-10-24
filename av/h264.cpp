@@ -33,12 +33,15 @@ void h264_vec(std::vector<vector<char>> &v_slice)
 {
 	char *pfile = "test.264";
 	FILE *fp = NULL;
+	errno_t err;
 	static unsigned char h264_data[1024*1024*200]={0};
-	fp = fopen(pfile, "rb");
-	if (fp == NULL){
+
+	err = fopen_s(&fp, pfile, "rb");
+	if(err != 0){
 		cout << "open "<<pfile<<" err\n";
 		return;
 	}
+
 	int m_nFileBufSize;
 	m_nFileBufSize = fread(h264_data,1,sizeof(h264_data),fp);
 	fclose(fp);
