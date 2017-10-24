@@ -25,6 +25,7 @@ void tst_rtmp(void)
 	o_aac.init(a_hz,1,16);
 	vector<vector<char>> va_slice;
 	wav_vec(o_aac.get_input_samples(),va_slice);
+	double aac_slice_ms = (double)o_aac.get_input_samples()*1000/a_hz;
 	
 	myrtmp rtmp_sender;
 	bool bret = rtmp_sender.connect("rtmp://192.168.5.116/live/zb");
@@ -44,7 +45,7 @@ void tst_rtmp(void)
 
 		rtmp_sender.send_v((char*)&v_slice[i][0],v_slice[i].size(),bKeyframe,tick);
 		//msleep(40);
-		tick +=46;  
+		tick += (int)aac_slice_ms;
 
 		{
 			vector<char> v_aac;
@@ -52,7 +53,7 @@ void tst_rtmp(void)
 			o_aac.pcm2aac(&va_slice[i][0],o_aac.get_input_samples(),v_aac);
 			if (v_aac.size()>0){
 				rtmp_sender.send_a((&v_aac[0])+7,v_aac.size()-7,aac_tick);
-				aac_tick += 46;//aac每次1024个采样，在22050hz下需要46ms，上面帧率跟这个也有关
+				aac_tick += (int)aac_slice_ms;//aac每次1024个采样，在22050hz下需要46ms，上面帧率跟这个也有关
 			}
 		}
 	}  

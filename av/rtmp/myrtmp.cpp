@@ -112,7 +112,7 @@ bool myrtmp::send_packet(int packet_type, const char *pd, int size, unsigned int
 	packet.m_nBodySize = size;
 	memcpy(packet.m_body, pd, size);
 
-	//int nRet = RTMP_SendPacket(m_p_rtmp,&packet,0);  
+	//int nRet = RTMP_SendPacket((RTMP *)m_p_rtmp, &packet, 0);  
 	int nRet = RTMP_SendPacket((RTMP *)m_p_rtmp, &packet, 1);
 
 	RTMPPacket_Free(&packet);
