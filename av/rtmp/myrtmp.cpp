@@ -8,33 +8,33 @@
 using namespace std;
 
 #include "librtmp/rtmp.h"
-#include "librtmp/rtmp_sys.h"   
-#include "librtmp/amf.h"   
+#include "librtmp/rtmp_sys.h"
+#include "librtmp/amf.h"
 
 
 #ifdef WIN32
-#pragma comment(lib,"WS2_32.lib")   
+#pragma comment(lib,"WS2_32.lib")
 #pragma comment(lib,"winmm.lib")
-#endif   
+#endif
 
 int InitSockets()
 {
-#ifdef WIN32     
+#ifdef WIN32
 	WORD version;
 	WSADATA wsaData;
 	version = MAKEWORD(1, 1);
 	return (WSAStartup(version, &wsaData) == 0);
-#else     
+#else
 	return TRUE;
-#endif     
+#endif
 }
 
 
 inline void CleanupSockets()
 {
-#ifdef WIN32     
+#ifdef WIN32
 	WSACleanup();
-#endif     
+#endif
 }
 
 myrtmp::myrtmp(void)
