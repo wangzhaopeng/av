@@ -64,6 +64,7 @@ bool myrtmp::connect(const char* url, int chunk_size)
 	if (iret != 1){
 		cout << url << endl;
 		cout << "RTMP_SetupURL false" << endl;
+		deinit();
 		return FALSE;
 	}
 
@@ -73,6 +74,7 @@ bool myrtmp::connect(const char* url, int chunk_size)
 	if (iret != 1){
 		cout << url << endl;
 		cout << "RTMP_Connect false" << endl;
+		deinit();
 		return FALSE;
 	}
 
@@ -80,6 +82,7 @@ bool myrtmp::connect(const char* url, int chunk_size)
 	if (iret != 1){
 		cout << url << endl;
 		cout << "RTMP_ConnectStream false" << endl;
+		deinit();
 		return FALSE;
 	}
 
@@ -87,6 +90,7 @@ bool myrtmp::connect(const char* url, int chunk_size)
 	if (!bret){
 		cout << url << endl;
 		cout << "change_chunk_size false " << chunk_size << endl;
+		deinit();
 		return false;
 	}
 
