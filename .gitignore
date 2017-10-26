@@ -38,9 +38,11 @@ modules.builtin
 /Debug/*.exe
 /Debug/*.ilk
 /Debug/*.pdb
+/Debug/*.txt
 /av/Debug
 /av/*.vcproj.*
 /av/*.mp4
+/av/*.txt
 
 #
 # Top-level generic files
