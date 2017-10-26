@@ -107,7 +107,7 @@ static void tst_rcv(void)
 		return;
 	}
 	
-	const int buf_size = 1024*8;
+	const int buf_size = 1024*1024*5;
 	char *p_buf = new char[buf_size];
 	while(1){
 		int r_size;
