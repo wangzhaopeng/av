@@ -80,6 +80,9 @@ static void tst_send(void)
 	double h264_slice_ms = 1000/30.0;/////用的30帧的视频
 
 	string str_send_hex;
+	str_send_hex += hex2str(&v_slice[0][0],v_slice[0].size());
+	str_send_hex += hex2str(&v_slice[1][0],v_slice[1].size());
+	str_send_hex += hex2str(&(o_aac.get_decoder_info()[0]),(o_aac.get_decoder_info().size()));
 
 	int a_f = 0;
 	int v_f = 0;
@@ -97,7 +100,7 @@ static void tst_send(void)
 			}
 			cout << "rtmp_sender.send_v ms "<<GetTickCount()-ms_bsendv<<" size "<<v_slice[idx].size() <<endl;
 
-			string tem_str = hex2str(&v_slice[idx][0],v_slice[idx].size());
+			str_send_hex += hex2str(&v_slice[idx][0],v_slice[idx].size());
 
 			a_f++;
 			if (a_f>=(int)v_slice.size()){//////是否无限循环
@@ -117,9 +120,9 @@ static void tst_send(void)
 				if (!bret){
 					cout<<"rtmp_sender.send_a false"<<endl;
 				}
-				cout << "rtmp_sender.send_a ms "<<GetTickCount()-ms_bsenda<<" size "<<v_aac.size() <<endl;
+				cout << "rtmp_sender.send_a ms "<<GetTickCount()-ms_bsenda<<" size "<<v_aac.size()-7 <<endl;
 
-				string tem_str = hex2str((&v_aac[0])+7,v_aac.size()-7);
+				str_send_hex += hex2str((&v_aac[0])+7,v_aac.size()-7);
 			}
 
 			v_f++;
