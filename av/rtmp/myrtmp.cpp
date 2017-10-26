@@ -54,11 +54,14 @@ void myrtmp::deinit(void)
 	CleanupSockets();
 }
 
-bool myrtmp::connect(const char* url, int chunk_size)
+bool myrtmp::connect(const char* url, bool send_flag, int chunk_size)
 {
 	m_p_rtmp = RTMP_Alloc();
 	RTMP_Init((RTMP *)m_p_rtmp);
 
+	//RTMP *tem_rtmp = (RTMP *)m_p_rtmp;
+
+	//((RTMP *)m_p_rtmp)->Link.timeout=10;
 	int iret;
 	iret = RTMP_SetupURL((RTMP *)m_p_rtmp, (char*)url);
 	if (iret != 1){
@@ -68,7 +71,12 @@ bool myrtmp::connect(const char* url, int chunk_size)
 		return FALSE;
 	}
 
-	RTMP_EnableWrite((RTMP *)m_p_rtmp);
+	if (send_flag){
+		RTMP_EnableWrite((RTMP *)m_p_rtmp);
+	}
+
+	//((RTMP *)m_p_rtmp)->Link.lFlags|=RTMP_LF_LIVE;
+	//RTMP_SetBufferMS((RTMP *)m_p_rtmp, 3600*1000);
 
 	iret = RTMP_Connect((RTMP *)m_p_rtmp, NULL);
 	if (iret != 1){
@@ -234,4 +242,9 @@ bool myrtmp::send_a(const char *pd, int size, unsigned int time_stamp)
 	bool bret = send_packet(RTMP_PACKET_TYPE_AUDIO, body, 2+size, time_stamp);
 	delete[] body;
 	return bret;
+}
+
+int myrtmp::rcv(char*pb,int size)
+{
+	return RTMP_Read((RTMP *)m_p_rtmp,pb,size);
 }

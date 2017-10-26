@@ -15,7 +15,7 @@ void wav_vec(int size, std::vector<vector<char>> &v_slice);
 void h264_vec(std::vector<vector<char>> &v_slice);
 
 
-void tst_rtmp(void)
+static void tst_send(void)
 {
 	vector<vector<char>> v_slice;
 	h264_vec(v_slice);
@@ -29,7 +29,7 @@ void tst_rtmp(void)
 	
 	cout << "tst_rtmp "<<endl;
 	myrtmp rtmp_sender;
-	bool bret = rtmp_sender.connect("rtmp://192.168.5.116/live/zb");
+	bool bret = rtmp_sender.init_send("rtmp://192.168.5.116/live/zb");
 	if (!bret){
 		return;
 	}
@@ -83,4 +83,51 @@ void tst_rtmp(void)
 	}
 
 	return;
+}
+
+static void tst_rcv(void)
+{
+	char *pfile = "rcv_flv.mp4";////这个应该命名为.flv，只是git忽略 .MP4就暂时命名为mp4了
+	FILE *fp = NULL;
+	errno_t err;
+
+	err = fopen_s(&fp, pfile, "wb");
+	if(err != 0){
+		cout << "open "<<pfile<<" err\n";
+		return;
+	}
+
+	cout << "tst_rtmp rcv"<<endl;
+	myrtmp rtmp_rcv;
+	bool bret = rtmp_rcv.init_rcv("rtmp://192.168.5.116/live/zb");
+	//bool bret = rtmp_rcv.init_rcv("rtmp://live.hkstv.hk.lxdns.com/live/hks");
+	if (!bret){
+		cout<<"rtmp_rcv.init_rcv false"<<endl;
+		fclose(fp);
+		return;
+	}
+	
+	const int buf_size = 1024*8;
+	char *p_buf = new char[buf_size];
+	while(1){
+		int r_size;
+		r_size = rtmp_rcv.rcv(p_buf,buf_size-8);
+		if (r_size == 0){
+			break;
+		}
+		fwrite(p_buf,1,r_size,fp);
+	}
+
+
+	delete[] p_buf;
+
+
+	fclose(fp);
+}
+
+void tst_rtmp(void)
+{
+	tst_send();
+
+	//tst_rcv();
 }
