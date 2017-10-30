@@ -41,6 +41,8 @@ myrtmp::myrtmp(void)
 {
 	m_p_rtmp = NULL;
 	InitSockets();
+
+	m_rcv_buf.resize(m_rcv_buf_size);
 }
 
 myrtmp::~myrtmp(void)
@@ -244,7 +246,11 @@ bool myrtmp::send_a(const char *pd, int size, unsigned int time_stamp)
 	return bret;
 }
 
-int myrtmp::rcv(char*pb,int size)
+int myrtmp::rcv(char ** pp)
 {
-	return RTMP_Read((RTMP *)m_p_rtmp,pb,size);
+	char* p_b = &m_rcv_buf[0];
+	int rcv_size;
+	rcv_size = RTMP_Read((RTMP *)m_p_rtmp,p_b,m_rcv_buf_size);
+	*pp = p_b;
+	return rcv_size;
 }

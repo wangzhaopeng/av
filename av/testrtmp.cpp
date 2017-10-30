@@ -167,11 +167,11 @@ static void tst_rcv(void)
 
 	string str_rcv_hex;
 
-	const int buf_size = 1024*1024*5;
-	char *p_buf = new char[buf_size];
 	while(1){
 		int r_size;
-		r_size = rtmp_rcv.rcv(p_buf,buf_size-8);
+		char *p_buf;
+		r_size = rtmp_rcv.rcv(&p_buf);
+
 		if (r_size == 0){
 			break;
 		}
@@ -179,7 +179,7 @@ static void tst_rcv(void)
 		fwrite(p_buf,1,r_size,fp);
 		str_rcv_hex += hex2str(p_buf,r_size);
 	}
-	delete[] p_buf;
+
 	fclose(fp);
 	
 	{

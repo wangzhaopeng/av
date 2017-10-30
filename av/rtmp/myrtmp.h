@@ -25,7 +25,8 @@ public:
 	bool init_a(const std::vector<char> aac_info);
 	bool send_a(const char *pd, int size, unsigned int time_stamp);
 
-	int rcv(char*pb,int size);
+	////rcv
+	int rcv(char ** pp);
 private:
 	void deinit(void);
 	bool send_packet(int packet_type, const char *pd, int size, unsigned int nTimestamp);
@@ -33,6 +34,9 @@ private:
 
 	void* m_p_rtmp;//RTMP* m_p_rtmp;
 
+	////rcv
+	static const int m_rcv_buf_size = 5*1024*1024;
+	std::vector<char> m_rcv_buf;
 };
 
 #endif
