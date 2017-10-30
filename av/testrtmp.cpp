@@ -194,7 +194,7 @@ static void tst_rcv(void)
 
 void tst_rtmp(void)
 {
-	tst_send();
+	//tst_send();
 
-	//tst_rcv();
+	tst_rcv();
 }

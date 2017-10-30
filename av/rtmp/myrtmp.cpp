@@ -61,7 +61,7 @@ bool myrtmp::connect(const char* url, bool send_flag, int chunk_size)
 
 	//RTMP *tem_rtmp = (RTMP *)m_p_rtmp;
 
-	//((RTMP *)m_p_rtmp)->Link.timeout=10;
+	((RTMP *)m_p_rtmp)->Link.timeout=5;
 	int iret;
 	iret = RTMP_SetupURL((RTMP *)m_p_rtmp, (char*)url);
 	if (iret != 1){
