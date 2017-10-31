@@ -7,7 +7,7 @@
 using namespace std;
 
 #include <myaac.h>
-
+#include "mymp4.h"
 #include "myrtmp.h"
 
 #include <windows.h>
@@ -145,23 +145,21 @@ static void tst_send(void)
 
 static void tst_rcv(void)
 {
-	char *pfile = "rcv_flv.mp4";////这个应该命名为.flv，只是git忽略 .MP4就暂时命名为mp4了
-	FILE *fp = NULL;
-	errno_t err;
-
-	err = fopen_s(&fp, pfile, "wb");
-	if(err != 0){
-		cout << "open "<<pfile<<" err\n";
-		return;
-	}
-
 	cout << "tst_rtmp rcv"<<endl;
+
+	ofstream of_flv;
+	of_flv.open("rtmp_rcv.flv",ios::binary);
+
+	mymp4 o_mp4;
+	o_mp4.init("rtmp_rcv.mp4");
+	int aac_info_flag = 0;
+	int sps_pps_flag = 0;
+
 	myrtmp rtmp_rcv;
 	bool bret = rtmp_rcv.init_rcv("rtmp://192.168.5.116/live/zb");
 	//bool bret = rtmp_rcv.init_rcv("rtmp://live.hkstv.hk.lxdns.com/live/hks");
 	if (!bret){
 		cout<<"rtmp_rcv.init_rcv false"<<endl;
-		fclose(fp);
 		return;
 	}
 
@@ -176,21 +174,45 @@ static void tst_rcv(void)
 			break;
 		}
 		cout << "rcv size "<<r_size<<endl;
-		fwrite(p_buf,1,r_size,fp);
+
+		of_flv.write(p_buf,r_size);
+
 		str_rcv_hex += hex2str(p_buf,r_size);
+
+		{
+			/////把收到的flv数据转为h264 aac 存为mp4
+			s_rcv_data rcv_data;
+			rtmp_rcv.flv2mp4(p_buf,r_size,&rcv_data);
+			if (rcv_data.p_aac_info&&aac_info_flag==0){
+				aac_info_flag = 1;
+				o_mp4.init_a(22050,1024,
+					vector<char>(rcv_data.p_aac_info,rcv_data.p_aac_info+rcv_data.aac_info_size));
+			}
+			if (rcv_data.p_pps&&rcv_data.p_sps,sps_pps_flag==0){
+				sps_pps_flag = 1;
+				o_mp4.init_v(1280,720,30,
+					vector<char>(rcv_data.p_sps,rcv_data.p_sps+rcv_data.sps_size),
+					vector<char>(rcv_data.p_pps,rcv_data.p_pps+rcv_data.pps_size));
+			}
+			if (aac_info_flag&&rcv_data.p_aac){
+				o_mp4.write_a(rcv_data.p_aac, rcv_data.aac_size);
+			}
+			if (sps_pps_flag&&rcv_data.p_h264){
+				o_mp4.write_v(rcv_data.p_h264, rcv_data.h264_size);
+			}
+		}
 	}
 
-	fclose(fp);
-	
 	{
 		ofstream ofile;
 		ofile.open("rcv_rtmp_hex.txt");
 		ofile<<str_rcv_hex;
-		ofile.close();
+		//ofile.close();
 	}
 
 	return;
 }
+
 
 void tst_rtmp(void)
 {

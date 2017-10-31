@@ -254,3 +254,183 @@ int myrtmp::rcv(char ** pp)
 	*pp = p_b;
 	return rcv_size;
 }
+
+void myrtmp::flv2mp4(const char*pd,int size,s_rcv_data *p_rcv_data)
+{
+	const char *pd_cur;
+	pd_cur = pd;
+
+	s_rcv_data tem_data = {0};
+	*p_rcv_data = tem_data;
+
+	if (*pd_cur == 'F'){
+		////头三个字节为"FLV"
+		pd_cur+=9;////跳过FLV Header
+		pd_cur+=4;////跳过previousTagSizen
+	}
+
+	int iret;
+	while(pd_cur<pd+size){
+		s_rtmp_chunk s_chunk={0};
+		pd_cur=get_chunk(pd_cur,size-(pd_cur-pd),&s_chunk);
+		if (s_chunk.type == 0x8){
+			////音频
+			iret = get_aac(&s_chunk, p_rcv_data);
+			if (iret == -1){
+				p_rcv_data->err_flag = 1;
+				return;
+			}
+		}else if (s_chunk.type == 0x9){
+			////视频
+			iret = get_h264(&s_chunk,p_rcv_data);
+			if (iret == -1){
+				p_rcv_data->err_flag = 1;
+				return;
+			}
+		}else{
+			cout<<"err rcv not AUDIO VIDEO "<<endl;
+			p_rcv_data->err_flag = 1;
+			return;
+		}
+	}
+}
+
+char* myrtmp::get_chunk(const char*pd,int size,s_rtmp_chunk* p_chunk)
+{
+	const unsigned char *pd_cur;
+	pd_cur = (unsigned char *)pd;
+
+	if (*pd_cur != 0x8 && *pd_cur != 0x9){
+		cout<<"err rcv not AUDIO VIDEO "<<endl;
+		return (char*)pd+size;
+	}
+
+	if(size<11+4){
+		cout<<"err size need min 11+4 "<<endl;
+		return (char*)pd+size;
+	}
+
+	p_chunk->type = *pd_cur++;
+
+	p_chunk->size += (*pd_cur++<<16);
+	p_chunk->size += (*pd_cur++<<8);
+	p_chunk->size += (*pd_cur++<<0);
+
+	if (size < (int)(11+4+p_chunk->size)){
+		cout<<"err size < 11+4+s_chunk.size "<<endl;
+		return (char*)pd+size;
+	}
+
+	p_chunk->time_stamp += (*pd_cur++<<24);
+	p_chunk->time_stamp += (*pd_cur++<<16);
+	p_chunk->time_stamp += (*pd_cur++<<8);
+	p_chunk->time_stamp += (*pd_cur++<<0);
+
+	pd_cur += 3;
+	p_chunk->p_d = (char*)pd_cur;
+	pd_cur += p_chunk->size;
+	pd_cur += 4;
+
+	return (char*)pd_cur;
+}
+
+/////返回-1错误   1有数据   0 aac info
+int myrtmp::get_aac(const s_rtmp_chunk* p_chunk,s_rcv_data *p_rcv_data)
+{
+	const unsigned char *pd_cur;
+	pd_cur = (unsigned char *)p_chunk->p_d;
+	if (*pd_cur!=0xaf){
+		cout<<"err get_aac *pd_cur!=0xaf "<<endl;
+		return -1;
+	}
+	if (p_chunk->size<4){
+		////aac info 2字节 加头 为4字节
+		cout<<"err get_aac s_chunk.size<4"<<endl;
+		return -1;
+	}
+
+	if (*(pd_cur+1)==0x1){
+		////aac 声音数据
+		p_rcv_data->p_aac = (char*)pd_cur+2;
+		p_rcv_data->aac_size = p_chunk->size - 2;
+
+		return 1;
+	}else if (*(pd_cur+1)==0x0){
+		////aac info
+		if (p_chunk->size>64){
+			/////限定 aac info 不会超过64字节 或者小于4-2字节
+			cout<<"err get_aac aac info > 64 "<<endl;
+			return -1;
+		}else{
+			p_rcv_data->p_aac_info = (char*)pd_cur+2;
+			p_rcv_data->aac_info_size = p_chunk->size - 2;
+
+			return 0;
+		}
+	}else {
+		cout<<"err get_aac *pd_cur!=0 1 "<<endl;
+		return -1;
+	}
+}
+
+/////返回-1错误   1有数据   0 sps pps
+int myrtmp::get_h264(const s_rtmp_chunk* p_chunk,s_rcv_data *p_rcv_data)
+{
+	const unsigned char *pd_cur;
+	pd_cur = (unsigned char *)p_chunk->p_d;
+	if (*pd_cur!=0x17 && *pd_cur!=0x27){
+		cout<<"err get_h264 *pd_cur!=0x17 || *pd_cur!=0x27 "<<endl;
+		return -1;
+	}
+
+	if ((*pd_cur==0x17||*pd_cur==0x27) && *(pd_cur+1)==0x1){
+		////视频帧
+
+		if (p_chunk->size<9){
+			cout << "err get_h264 s_chunk.size<9"<<endl;
+			return -1;
+		}
+
+		p_rcv_data->p_h264 = (char*)pd_cur + 9;
+		p_rcv_data->h264_size = p_chunk->size - 9;
+		return 1;
+	}else if (*pd_cur==0x17 && *(pd_cur+1)==0x0){
+		////sps pps
+		if (p_chunk->size<13){
+			cout << "err sps pps s_chunk.size<13"<<endl;
+			return -1;
+		}
+		int sps_len = (pd_cur[11]<<8)+pd_cur[12];
+
+		if ((int)p_chunk->size<13+sps_len+3){
+			cout<< "err sps pps s_chunk.size<13+sps_len"<<endl;
+			return -1;
+		}
+		if (sps_len>256){
+			cout<< "err sps_len>256"<<endl;
+			return -1;
+		}
+
+		p_rcv_data->p_sps = (char*)&pd_cur[13];
+		p_rcv_data->sps_size = sps_len;
+
+		int pps_len = (pd_cur[13+sps_len+1]<<8)+pd_cur[13+sps_len+2];
+
+		if ((int)p_chunk->size<13+sps_len+3+pps_len){
+			cout<< "err s_chunk.size<13+sps_len+3+pps_len"<<endl;
+			return -1;
+		}
+		if (pps_len>256){
+			cout<< "err pps_len>256"<<endl;
+			return -1;
+		}
+
+		p_rcv_data->p_pps = (char *)&pd_cur[13+sps_len+3];
+		p_rcv_data->pps_size = pps_len;
+
+		return 0;
+	}else {
+		cout<<"err get_h264 err "<<endl;
+		return -1;
+	}
+}
