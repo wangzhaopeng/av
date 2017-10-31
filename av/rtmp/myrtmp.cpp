@@ -273,22 +273,26 @@ void myrtmp::flv2mp4(const char*pd,int size,s_rcv_data *p_rcv_data)
 	while(pd_cur<pd+size){
 		s_rtmp_chunk s_chunk={0};
 		pd_cur=get_chunk(pd_cur,size-(pd_cur-pd),&s_chunk);
-		if (s_chunk.type == 0x8){
-			////ÒôÆµ
+		if (s_chunk.type == RTMP_PACKET_TYPE_AUDIO){
 			iret = get_aac(&s_chunk, p_rcv_data);
 			if (iret == -1){
 				p_rcv_data->err_flag = 1;
 				return;
 			}
-		}else if (s_chunk.type == 0x9){
-			////ÊÓÆµ
+		}else if (s_chunk.type == RTMP_PACKET_TYPE_VIDEO){
 			iret = get_h264(&s_chunk,p_rcv_data);
 			if (iret == -1){
 				p_rcv_data->err_flag = 1;
 				return;
 			}
+		}else if (s_chunk.type == RTMP_PACKET_TYPE_INFO){
+
+			static char buf[1024];
+			memcpy(buf,s_chunk.p_d,s_chunk.size);
+			int a = 0;
+			a ++;
 		}else{
-			cout<<"err rcv not AUDIO VIDEO "<<endl;
+			cout<<"err rcv not AUDIO VIDEO TYPE_INFO "<<endl;
 			p_rcv_data->err_flag = 1;
 			return;
 		}
@@ -300,8 +304,8 @@ char* myrtmp::get_chunk(const char*pd,int size,s_rtmp_chunk* p_chunk)
 	const unsigned char *pd_cur;
 	pd_cur = (unsigned char *)pd;
 
-	if (*pd_cur != 0x8 && *pd_cur != 0x9){
-		cout<<"err rcv not AUDIO VIDEO "<<endl;
+	if (*pd_cur != RTMP_PACKET_TYPE_AUDIO && *pd_cur != RTMP_PACKET_TYPE_VIDEO && *pd_cur != RTMP_PACKET_TYPE_INFO){
+		cout<<"err rcv not AUDIO VIDEO TYPE_INFO "<<endl;
 		return (char*)pd+size;
 	}
 
