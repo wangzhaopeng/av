@@ -185,11 +185,13 @@ static void tst_rcv(void)
 			rtmp_rcv.flv2mp4(p_buf,r_size,&rcv_data);
 			if (rcv_data.p_aac_info&&aac_info_flag==0){
 				aac_info_flag = 1;
+				////还不知道怎么从aac中得到 下面的22050 1024
 				o_mp4.init_a(22050,1024,
 					vector<char>(rcv_data.p_aac_info,rcv_data.p_aac_info+rcv_data.aac_info_size));
 			}
 			if (rcv_data.p_pps&&rcv_data.p_sps,sps_pps_flag==0){
 				sps_pps_flag = 1;
+				//////从sps中能得到视频分辨率，帧率不知怎么得到
 				o_mp4.init_v(1280,720,30,
 					vector<char>(rcv_data.p_sps,rcv_data.p_sps+rcv_data.sps_size),
 					vector<char>(rcv_data.p_pps,rcv_data.p_pps+rcv_data.pps_size));
