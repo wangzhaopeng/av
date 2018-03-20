@@ -1,6 +1,7 @@
 #ifndef __MYMP4_H__
 #define __MYMP4_H__
 
+#include <string.h>
 #include <vector>
 #include <string>
 
@@ -17,7 +18,7 @@ public:
 
 	//video
 	bool init_v(int width,int height, int frameRate,const std::vector<char>&v_sps,const std::vector<char>&v_pps);
-	bool mymp4::write_v(const char *pd, int size);
+	bool write_v(const char *pd, int size);
 
 private:
 	void deinit(void);
