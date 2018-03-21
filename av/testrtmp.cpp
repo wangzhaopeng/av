@@ -59,15 +59,15 @@ static void tst_send(void)
 	h264_vec(v_slice);
 
 	int a_hz=22050;
-	myaac o_aac;
-	o_aac.init(a_hz,1,16);
+	myaac o_aac(a_hz,1,16);
+	o_aac.init();
 	vector<vector<char>> va_slice;
 	wav_vec(o_aac.get_input_samples(),va_slice);
 	double aac_slice_ms = (double)o_aac.get_input_samples()*1000/a_hz;
 	
 	cout << "tst_rtmp "<<endl;
 	myrtmp rtmp_sender;
-	bool bret = rtmp_sender.init_send("rtmp://192.168.5.116/live/zb");
+	bool bret = rtmp_sender.init_send("rtmp://192.168.5.220/live/zb");
 	if (!bret){
 		return;
 	}
@@ -218,7 +218,7 @@ static void tst_rcv(void)
 
 void tst_rtmp(void)
 {
-	//tst_send();
+	tst_send();
 
 	tst_rcv();
 }

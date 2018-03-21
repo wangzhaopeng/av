@@ -33,8 +33,8 @@ void tst_mp4(void)
 	////ÃÌº”“Ù∆µ≤ø∑÷
 	{
 		int a_hz=22050;
-		myaac o_aac;
-		o_aac.init(a_hz,1,16);
+		myaac o_aac(a_hz,1,16);
+		o_aac.init();
 
 		vector<vector<char>> v_slice;
 		wav_vec(o_aac.get_input_samples(),v_slice);

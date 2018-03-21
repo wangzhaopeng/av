@@ -8,9 +8,11 @@
 #include <faac.h>
 
 
-
-myaac::myaac(void)
+myaac::myaac(int hz, int channal, int bits)
 {
+	m_hz = hz;
+	m_channal = channal;
+	m_bits = bits;
 	m_h_encoder = NULL;
 	m_p_out_buf = NULL;
 }
@@ -35,12 +37,9 @@ void myaac::deinit(void)
 	}
 }
 
-bool myaac::init(int hz, int channal, int bits)
-{
+
+bool myaac::init(void){
 	int iret = 0;
-	m_hz = hz;
-	m_channal = channal;
-	m_bits = bits;
 
 	// init faac
 	m_h_encoder = faacEncOpen(m_hz, m_channal, &m_input_samples, &m_max_output_size);
@@ -51,8 +50,7 @@ bool myaac::init(int hz, int channal, int bits)
 
 	// Get current encoding configuration
 	faacEncConfigurationPtr p_cfg = faacEncGetCurrentConfiguration(m_h_encoder);
-	if (!p_cfg)
-	{
+	if (!p_cfg){
 		printf("faacEncGetCurrentConfiguration error!\n");
 		deinit();
 		return false;
@@ -79,8 +77,7 @@ bool myaac::init(int hz, int channal, int bits)
 	p_cfg->bitRate = 0;
 
 	iret = faacEncSetConfiguration(m_h_encoder, p_cfg);
-	if (iret != 1)
-	{
+	if (iret != 1){
 		deinit();
 		printf("faacEncSetConfiguration error!\n");
 		return false;
@@ -89,8 +86,7 @@ bool myaac::init(int hz, int channal, int bits)
 	// get decoder info
 	unsigned char* p_decoder_info;
 	unsigned long  decoder_info_size;
-	if (faacEncGetDecoderSpecificInfo(m_h_encoder, &p_decoder_info, &decoder_info_size))
-	{
+	if (faacEncGetDecoderSpecificInfo(m_h_encoder, &p_decoder_info, &decoder_info_size)){
 		deinit();
 		printf("faacEncGetDecoderSpecificInfo error!\n");
 		return false;
@@ -102,13 +98,9 @@ bool myaac::init(int hz, int channal, int bits)
 	return true;
 }
 
-
-
-void myaac::pcm2aac(const char* pdata, int samples, std::vector<char> &v_aac)
-{
+void myaac::pcm2aac(const char* pdata, int samples, std::vector<char> &v_aac){
 	int iret = faacEncEncode(m_h_encoder, (int*)pdata, samples, m_p_out_buf, m_max_output_size);
-	if (iret <= 0)
-	{
+	if (iret <= 0){
 		return;
 	}
 

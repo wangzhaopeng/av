@@ -7,9 +7,9 @@ class myaac
 {
 public:
 	~myaac(void);
-	myaac(void);
+	myaac(int hz, int channal, int bits);
 
-	bool init(int hz, int channal, int bits);
+	bool init(void);
 	void pcm2aac(const char * pdata, int samples, std::vector<char> &v_aac);
 
 	inline int get_input_samples(void)const{ return m_input_samples; }
