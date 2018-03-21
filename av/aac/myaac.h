@@ -2,6 +2,7 @@
 #define __MYAAC_H__
 
 #include <vector>
+#include <deque>
 
 class myaac
 {
@@ -10,7 +11,7 @@ public:
 	myaac(int hz, int channal, int bits);
 
 	bool init(void);
-	void pcm2aac(const char * pdata, int samples, std::vector<char> &v_aac);
+	int pcm2aac(const char * pdata, int samples, std::vector<char> &v_aac);
 
 	inline int get_input_samples(void)const{ return m_input_samples; }
 	inline std::vector<char> get_decoder_info(void)const{ return m_v_decoder_info; }
@@ -30,6 +31,8 @@ private:
 
 	unsigned long m_input_samples;		// 输入样本数
 	std::vector<char> m_v_decoder_info;
+
+	std::deque<char> m_pcm_que;
 };
 
 #endif

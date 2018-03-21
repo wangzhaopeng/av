@@ -7,6 +7,9 @@
 
 #include <faac.h>
 
+#include <iostream>
+
+using namespace std;
 
 myaac::myaac(int hz, int channal, int bits)
 {
@@ -98,12 +101,29 @@ bool myaac::init(void){
 	return true;
 }
 
-void myaac::pcm2aac(const char* pdata, int samples, std::vector<char> &v_aac){
-	int iret = faacEncEncode(m_h_encoder, (int*)pdata, samples, m_p_out_buf, m_max_output_size);
-	if (iret <= 0){
-		return;
-	}
+////return -1 err     0 ok v_aac为输出的aac数据 为空代表没有aac数据
+int myaac::pcm2aac(const char* pdata, int samples, std::vector<char> &v_aac){
+	v_aac.clear();
 
-	std::vector<char> v_tem(m_p_out_buf,m_p_out_buf+iret);
-	v_aac.swap(v_tem);
+	int sample_size = m_bits/8;
+	int enc_size = sample_size*m_input_samples;
+	m_pcm_que.insert(m_pcm_que.end(),pdata,pdata+samples*sample_size);
+
+	std::vector<char> v_enc_samples;
+	if ((int)m_pcm_que.size()>=enc_size){
+		v_enc_samples.insert(v_enc_samples.begin(),m_pcm_que.begin(),m_pcm_que.begin()+enc_size);
+		m_pcm_que.erase(m_pcm_que.begin(), m_pcm_que.begin() + enc_size);
+
+		//int iret = faacEncEncode(m_h_encoder, (int*)pdata, samples, m_p_out_buf, m_max_output_size);
+		int iret = faacEncEncode(m_h_encoder, (int*)&v_enc_samples[0], m_input_samples, m_p_out_buf, m_max_output_size);
+		if(iret <0){
+			cout<<" faacEncEncode err "<<endl;
+			return -1;
+		}else if (iret == 0){
+
+		}else{
+			v_aac.insert(v_aac.end(),m_p_out_buf,m_p_out_buf+iret);
+		}
+	}
+	return 0;
 }
